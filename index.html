@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat App</title>
+    <!-- Import Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCulJnWYTnCU2Ltvm9sLtjvE8o0AxXZYw4",
+            authDomain: "chatbot94-21146.firebaseapp.com",
+            projectId: "chatbot94-21146",
+            storageBucket: "chatbot94-21146.firebasestorage.app",
+            messagingSenderId: "963399549493",
+            appId: "1:963399549493:web:b8fe2e9b4c136beeffa77c",
+            measurementId: "G-G5ZM1067W7"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Sign-in function for Google Auth
+        const signIn = () => {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    localStorage.setItem("user", JSON.stringify(user));
+                    document.getElementById("sendMessageBtn").disabled = false;
+                })
+                .catch((error) => {
+                    console.error("Error during login:", error);
+                });
+        };
+
+        // Send message function
+        const sendMessage = async () => {
+            const messageText = document.getElementById("messageInput").value;
+            if (messageText.trim()) {
+                const user = JSON.parse(localStorage.getItem('user'));
+
+                // Add the message to Firestore
+                await addDoc(collection(db, "messages"), {
+                    text: messageText,
+                    uid: user.uid,
+                    name: user.displayName,
+                    photoURL: user.photoURL,
+                    timestamp: serverTimestamp(),
+                });
+
+                document.getElementById("messageInput").value = '';
+            }
+        };
+
+        // Load messages in real-time
+        const messagesRef = collection(db, "messages");
+        const q = query(messagesRef, orderBy("timestamp"));
+        onSnapshot(q, (snapshot) => {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = ''; // Clear previous messages
+
+            snapshot.forEach((doc) => {
+                const message = doc.data();
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message-card');
+                messageDiv.innerHTML = `
+                    <img src="${message.photoURL || 'https://via.placeholder.com/150'}" alt="${message.name}">
+                    <div>
+                        <strong>${message.name}</strong>
+                        <p>${message.text}</p>
+                    </div>
+                `;
+                messagesDiv.appendChild(messageDiv);
+            });
+        });
+
+        // Automatically delete messages older than 2 days
+        setInterval(async () => {
+            const twoDaysAgo = new Date().getTime() - 2 * 24 * 60 * 60 * 1000;
+            const messagesSnapshot = await getDocs(q);
+            messagesSnapshot.forEach(async (doc) => {
+                if (doc.data().timestamp < twoDaysAgo) {
+                    await deleteDoc(doc.ref);
+                }
+            });
+        }, 60000); // Check every minute
+
+        // Check if the user is logged in
+        if (!auth.currentUser) {
+            signIn();
+        } else {
+            document.getElementById("sendMessageBtn").disabled = false;
+        }
+
+        // Event listener for sending messages
+        document.getElementById("sendMessageBtn").addEventListener("click", sendMessage);
+    </script>
+    <style>
+        /* Styling the chat app */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Arial", sans-serif;
+        }
+
+        body {
+            background: #36393f;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .chat-container {
+            width: 80%;
+            max-width: 800px;
+            border-radius: 10px;
+            background-color: #2f3136;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .message-card {
+            background: #40444b;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .message-card img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .message-card p {
+            background-color: #2f3136;
+            padding: 5px;
+            border-radius: 5px;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .btn {
+            background-color: #7289da;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background-color: #5a6eae;
+        }
+
+        .input-box input {
+            padding: 12px;
+            width: 80%;
+            margin-right: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatApp">
+        <div class="messages" id="messages"></div>
+
+        <!-- Input field and Send button -->
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="Type your message..." />
+            <button id="sendMessageBtn" class="btn">Send</button>
+        </div>
+    </div>
+</body>
+</html>
