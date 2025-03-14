@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chatroom</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<style>
+   /* General Styles */
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    display: flex;
+    padding: 50px;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #f6f9fc, #e3f2fd);
+    color: #333;
+    /* width: 200px; */
+    align-content: center;
+}
+
+/* Chat Container */
+.chat-container {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 13px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #007bff, #00bcd4);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.header button {
+    background: white;
+    color: #007bff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.header button:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.5);
+}
+
+/* Chat Box */
+.chat-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #00bcd4 #f6f9fc;
+}
+
+/* Messages */
+.message {
+    max-width: 75%;
+    padding: 12px;
+    border-radius: 10px;
+    word-wrap: break-word;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.message.sent {
+    background: linear-gradient(135deg, #007bff, #00bcd4);
+    color: white;
+    align-self: flex-end;
+    box-shadow: 0px 0px 8px rgba(0, 123, 255, 0.3);
+}
+
+.message.received {
+    background: #e3f2fd;
+    color: #333;
+    align-self: flex-start;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Message Avatar */
+.message img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 123, 255, 0.2);
+}
+
+/* Message Timestamp */
+.message .timestamp {
+    font-size: 0.75em;
+    color: #666;
+    position: absolute;
+    bottom: -18px;
+    right: 10px;
+}
+
+/* Input Area */
+.input-area {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    background: #f1f8ff;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Input Field */
+.input-area input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #00bcd4;
+    border-radius: 20px;
+    background: #ffffff;
+    color: #333;
+    outline: none;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-area input:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 6px rgba(0, 123, 255, 0.5);
+}
+
+/* Send Button */
+.input-area button {
+    background: linear-gradient(135deg, #007bff, #00bcd4);
+    color: white;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+.input-area button:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 0px 12px rgba(0, 123, 255, 0.6);
+}
+
+
+    
+
+    .dark-mode {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #e0e0e0;
+}
+
+.dark-mode .chat-container {
+    background: #1e293b;
+    border-radius: 12px;
+    box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.1);
+}
+
+.dark-mode .header {
+    background: linear-gradient(135deg, #334155, #475569);
+    color: #f8fafc;
+    font-weight: bold;
+    text-align: center;
+    padding: 12px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.dark-mode .input-area {
+    background: #2d3a4a;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.dark-mode .message {
+    padding: 12px;
+    border-radius: 8px;
+    max-width: 75%;
+    word-wrap: break-word;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .message.sent {
+    background: linear-gradient(135deg, #007bff, #00c6ff);
+    color: white;
+    align-self: flex-end;
+    box-shadow: 0px 0px 5px rgba(0, 150, 255, 0.3);
+}
+
+.dark-mode .message.received {
+    background: #394b61;
+    color: #e0e0e0;
+    align-self: flex-start;
+    box-shadow: 0px 0px 5px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .input-area input {
+    flex-grow: 1;
+    padding: 12px;
+    border: 1px solid #4a6fa1;
+    border-radius: 20px;
+    background: #1e293b;
+    color: #e0e0e0;
+    outline: none;
+    transition: border 0.3s ease;
+}
+
+.dark-mode .input-area input:focus {
+    border-color: #00c6ff;
+    box-shadow: 0px 0px 5px rgba(0, 198, 255, 0.5);
+}
+
+.dark-mode .input-area button {
+    background: linear-gradient(135deg, #00c6ff, #007bff);
+    color: white;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+.dark-mode .input-area button:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 0px 10px rgba(0, 198, 255, 0.6);
+}
+
+
+</style>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <button id="signInBtn">Sign In with Google</button>
+            <span id="userName"></span>
+            <button id="darkModeToggle">🌙</button>
+        </div>
+        <div class="chat-box" id="messages"></div>
+        <div class="input-area">
+            <!-- <button class="plus-button" id="plusButton">+</button> -->
+            <input type="text" id="messageInput" placeholder="Type a message..." disabled>
+            <button id="sendMessageBtn" disabled>➤</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCulJnWYTnCU2Ltvm9sLtjvE8o0AxXZYw4",
+        authDomain: "chatbot94-21146.firebaseapp.com",
+        projectId: "chatbot94-21146",
+        storageBucket: "chatbot94-21146.appspot.com",
+        messagingSenderId: "963399549493",
+        appId: "1:963399549493:web:b8fe2e9b4c136beeffa77c",
+        measurementId: "G-G5ZM1067W7"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // DOM Elements
+    const signInBtn = document.getElementById("signInBtn");
+    const sendMessageBtn = document.getElementById("sendMessageBtn");
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const plusButton = document.getElementById("plusButton");
+
+    // Sign-in Function
+    const signIn = () => {
+        signInWithPopup(auth, provider)
+            .then((result) => {
+                const user = result.user;
+                localStorage.setItem("user", JSON.stringify(user));
+                updateUI(user);
+            })
+            .catch(console.error);
+    };
+
+    // Send Message Function
+    const sendMessage = async () => {
+        const messageText = messageInput.value.trim();
+        if (messageText) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            await addDoc(collection(db, "messages"), {
+                text: messageText,
+                uid: user.uid,
+                name: user.displayName,
+                photoURL: user.photoURL,
+                timestamp: serverTimestamp()
+            });
+            messageInput.value = ''; // Clear the input field after sending the message
+        }
+    };
+
+    // Load Messages in Real-Time
+    const loadMessages = () => {
+        onSnapshot(query(collection(db, "messages"), orderBy("timestamp")), (snapshot) => {
+            messagesDiv.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const message = docSnap.data();
+                const user = JSON.parse(localStorage.getItem('user')) || {};
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', message.uid === user.uid ? 'sent' : 'received');
+                messageDiv.innerHTML = `
+                    <img src="${message.photoURL || 'default-profile.png'}" alt="Profile Picture">
+                    <div>
+                        <strong>${message.name}</strong><br>${message.text}
+                        <div class="timestamp">${new Date(message.timestamp?.seconds * 1000).toLocaleTimeString()}</div>
+                    </div>
+                `;
+                messagesDiv.appendChild(messageDiv);
+            });
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+    };
+
+    // Update UI on Sign-in
+    const updateUI = (user) => {
+        if (user) {
+            signInBtn.innerText = `Hello, ${user.displayName}`;
+            sendMessageBtn.disabled = false;
+            messageInput.disabled = false;
+            loadMessages();
+        } else {
+            signInBtn.innerText = "Sign In with Google";
+            sendMessageBtn.disabled = true;
+            messageInput.disabled = true;
+        }
+    };
+
+    // Event Listeners
+    if (signInBtn) signInBtn.addEventListener("click", signIn);
+    if (sendMessageBtn) sendMessageBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+
+    // Monitor Authentication State
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            localStorage.setItem("user", JSON.stringify(user));
+        } else {
+            localStorage.removeItem("user");
+        }
+        updateUI(user);
+    });
+
+    // Initialize UI
+    updateUI(JSON.parse(localStorage.getItem("user")));
+
+    // Dark Mode Toggle
+    darkModeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+    });
+
+    // Plus Button for Image Upload
+    plusButton.addEventListener("click", () => {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.onchange = async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const user = JSON.parse(localStorage.getItem('user'));
+                const storageRef = firebase.storage().ref();
+                const fileRef = storageRef.child(`images/${file.name}`);
+                await fileRef.put(file);
+                const fileURL = await fileRef.getDownloadURL();
+                await addDoc(collection(db, "messages"), {
+                    text: `<img src="${fileURL}" alt="Image">`,
+                    uid: user.uid,
+                    name: user.displayName,
+                    photoURL: user.photoURL,
+                    timestamp: serverTimestamp()
+                });
+            }
+        };
+        fileInput.click();
+    });
+
+  
+</script>
+</body>
+</html>
